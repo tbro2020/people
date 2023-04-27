@@ -107,11 +107,13 @@ class BaseModel(models.Model):
     created = models.DateTimeField(verbose_name="Créée le", auto_now_add=True)
 
     def approvers(self):
-        qs = Approver.objects.filter(model='leave.Leave').values_list('employee', flat=True)
+        app_label, model_name  = self._meta.app_label, self._meta.model_name
+        qs = Approver.objects.filter(model=f'{app_label}.{model_name}').values_list('employee', flat=True)
         return apps.get_model('employee', model_name='employee').objects.filter(id__in=qs)
 
     def approvals(self):
-        qs = Approval.objects.filter(model='leave.Leave', _pk=self.pk).values_list('approved_by', flat=True)
+        app_label, model_name = self._meta.app_label, self._meta.model_name
+        qs = Approval.objects.filter(model=f'{app_label}.{model_name}', _pk=self.pk).values_list('approved_by', flat=True)
         return apps.get_model('employee', model_name='employee').objects.filter(id__in=qs)
 
     def approved(self):
