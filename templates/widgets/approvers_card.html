@@ -1,0 +1,10 @@
+{% if obj.approvals %}
+<div class="card mt-2">
+    <div class="card-header text-bg-warning">Approbation</div>
+    <div class="card-body">
+        {% for approval in obj.approvals %}
+            {{ approval }}({{ approval.function }})
+        {% endfor %}
+    </div>
+</div>
+{% endif %}

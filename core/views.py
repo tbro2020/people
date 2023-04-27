@@ -2,6 +2,7 @@ from django.http import HttpResponseRedirect
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render, reverse, redirect, get_object_or_404
 from django.contrib import messages
+from django.urls import reverse_lazy
 from django.views import View
 from django.apps import apps
 
@@ -9,6 +10,7 @@ from django.forms import modelform_factory, inlineformset_factory
 from core.forms import AcceptForm, Row3Form, InlineForm
 from core.filters import filterset_factory
 
+Notification = apps.get_model('core', model_name='notification')
 
 class Home(LoginRequiredMixin, View):
     def get(self, request):
@@ -17,17 +19,20 @@ class Home(LoginRequiredMixin, View):
 
 
 class Read(LoginRequiredMixin, View):
-    def get(self, request, app, model, pk):
+    def get(self, request, app, model):
         model = apps.get_model(app, model_name=model)
-        obj = get_object_or_404(model, pk=pk)
+        obj = get_object_or_404(model, **request.GET.dict())
+
+        if hasattr(obj, 'redirect_to'):
+            if hasattr(obj, 'visited'):
+                setattr(obj, 'visited', True)
+                obj.save()
+            return HttpResponseRedirect(getattr(obj, 'redirect_to'))
 
         inlines = []
-        form = modelform_factory(model)(instance=obj)
-
         for inline in getattr(model, 'conf', {}).get('change', {}).get('form', {}).get('inlines', []):
             _model = apps.get_model(inline.get('app'), model_name=inline.get('model'))
-            _form = inlineformset_factory(model, _model, extra=1)(instance=obj)
-            inlines.append(_form)
+            inlines.append(_model.objects.filter(**{model._meta.model_name: obj}))
         return render(request, f'{self.__class__.__name__.lower()}.html', locals())
 
 
@@ -79,6 +84,17 @@ class Create(LoginRequiredMixin, View):
         [inline.save() for inline in inlines]
         messages.add_message(request, messages.SUCCESS,
                              message=f'The {model._meta.verbose_name} has been successfuly created')
+
+        # Notification need to be thread action
+        approvers = form.instance.approvers() or []
+        approvers = [Notification(**{
+            'message': f'{model._meta.verbose_name} #{form.instance.id} approval required',
+            'target_id': approver.id,
+            'redirect_to': f"{reverse_lazy('core:change', kwargs={'app': app, 'model': model._meta.model_name})}?pk={form.instance.id}",
+            'visited': False
+        }) for approver in approvers]
+        Notification.objects.bulk_create(approvers)
+
         return redirect(
             f"{reverse('core:change', kwargs={'app': app, 'model': model._meta.model_name})}?pk={form.instance.pk}")
 
@@ -87,6 +103,10 @@ class Change(LoginRequiredMixin, View):
     def get(self, request, app, model):
         model = apps.get_model(app, model_name=model)
         obj = get_object_or_404(model, **request.GET.dict())
+
+        # if change does not exist return to view
+        if 'change' not in getattr(model, 'conf', {}):
+            return redirect(f"{reverse('core:read', kwargs={'app': app, 'model': model._meta.model_name})}?pk={obj.id}")
 
         inlines = []
         fields = getattr(model, 'conf', {}).get('change', {}).get('form', {}).get('fields', '__all__')
@@ -151,17 +171,15 @@ class Delete(LoginRequiredMixin, View):
 
 
 class Action(LoginRequiredMixin, View):
-    def post(self, request, app, model, pk, action):
+    def post(self, request, app, model, action):
         model = apps.get_model(app, model_name=model)
-        obj = get_object_or_404(model, pk=pk)
+        obj = get_object_or_404(model, **request.GET.dict())
 
-        action = getattr(model, 'conf', {}).get('change', {}).get('action', {}).get(action, {})
-        if eval(action.get('condition', 'False')):
-            return redirect('')
-        eval(action.get('statement', 'False'))
-        messages.add_message(request, level=messages.SUCCESS,
-                             message=f'Successful action on {model._meta.verbose_name}')
-        return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+        _action = getattr(model, 'conf', {}).get('change', {}).get('action', [])
+        _action = [item for item in _action if item.get('title') == action]
+        if len(_action) != 1: return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+        if eval(_action[0].get('condition')): eval(_action[0].get('statement'))
+        return HttpResponseRedirect(request.GET.dict().get('redirect_to', None) or request.META.get('HTTP_REFERER'))
 
 
 class Document(LoginRequiredMixin, View):

@@ -200,7 +200,7 @@ class Employee(models.Model):
                 'inlines': [{
                     'app': 'core',
                     'model': 'user',
-                    'fields': ['email', 'user_permissions']
+                    'fields': ['email', 'groups']
                 }, {
                     'app': 'employee',
                     'model': 'child',
@@ -215,7 +215,8 @@ class Employee(models.Model):
                 'method': 'GET',
                 'href': reverse_lazy('core:delete', kwargs={'app': 'employee', 'model': 'employee'}),
                 'class': 'btn btn-danger',
-                'title': 'Delete'
+                'title': 'Delete',
+                'condition': 'True'
             }, {
                 'method': 'GET',
                 'href': reverse_lazy('core:document', kwargs={'app': 'employee', 'model': 'employee', 'document': 'employee'}),

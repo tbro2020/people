@@ -34,9 +34,7 @@
         {% if filter_form and filter_form|length > 1 %}
         <div class="col-2">
             <div class="card">
-                <div class="card-header">
-                    Filtre
-                </div>
+                <div class="card-header">Filtre</div>
                 <div class="card-body">
                     {{ filter_form|crispy }}
                 </div>
@@ -45,15 +43,14 @@
         {% elif model.conf.description %}
         <div class="col-2">
             <div class="card">
-                <div class="card-header">
-                    Description
-                </div>
+                <div class="card-header">Description</div>
                 <div class="card-body">
-                    <p>{{ model.conf.description }}</p>
+                    <p class="p-0 m-0">{{ model.conf.description }}</p>
                 </div>
             </div>
         </div>
         {% endif %}
+
         <div class="col">
             <div class="card">
                 <div class="card-header">

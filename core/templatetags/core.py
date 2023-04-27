@@ -12,14 +12,14 @@ def menu(request):
     for model in apps.get_models():
         meta = model._meta
         if meta.app_label in ["admin"]: continue
-        if meta.model_name not in ["employee", "leave", "exit", "requisition", "fundrequest"]: continue
+        if meta.model_name not in ["notification", "announcement", "employee", "leave", "exit", "requisition", "fundrequest"]: continue
         if meta.app_label not in app: app[meta.app_label] = []
         if request.user.has_perm(f"{meta.app_label}.view_{meta.model_name}"):
             app[meta.app_label].append({
                 "icon": getattr(model, 'conf', {}).get('icon', None),
                 "name": meta.model_name, "verbose": meta.verbose_name,
                 "url": getattr(model, 'conf', {}).get('entry', None),
-                "badge": 12 if meta.model_name == "notification" else None
+                "badge": model.objects.filter(target=request.user.employee, visited=False).count() if meta.model_name == "notification" else None
             })
     return {k: v for k, v in app.items() if v}
 
@@ -61,4 +61,15 @@ def approvers(model):
 @register.filter(name="background")
 def background(prefix):
     backgrounds = ['primary', 'success', 'info', 'warning', 'danger']
-    return f'{prefix}{backgrounds[randint(0,len(backgrounds)-1)]}'
+    return f'{prefix}{backgrounds[randint(0, len(backgrounds) - 1)]}'
+
+
+@register.filter(name="stack")
+def stack(a, b):
+    return a, b
+
+
+@register.filter(name="eval")
+def _eval(value, statement):
+    request, obj = value
+    return eval(statement)

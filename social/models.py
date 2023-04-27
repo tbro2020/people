@@ -43,13 +43,23 @@ class FundRequest(BaseModel):
                 'method': 'GET',
                 'href': reverse_lazy('core:delete', kwargs={'app': 'social', 'model': 'fundrequest'}),
                 'class': 'btn btn-danger',
-                'title': 'Delete'
+                'title': 'Delete',
+                'condition': 'True'
             }, {
                 'method': 'GET',
                 'href': reverse_lazy('core:document',
                                      kwargs={'app': 'social', 'model': 'fundrequest', 'document': 'fundrequest'}),
                 'class': 'btn btn-info',
-                'title': 'Document'
+                'title': 'Document',
+                'condition': 'obj.approved()'
+            }, {
+                'method': 'POST',
+                'href': reverse_lazy('core:action', kwargs={'app': 'social', 'model': 'fundrequest', 'action': 'Approver'}),
+                'class': 'btn btn-warning',
+                'title': 'Approver',
+                'condition': 'request.user.employee in obj.approvers() and request.user.employee not in '
+                             'obj.approvals',
+                'statement': 'obj.approve(request)'
             }]
         },
         'create': {

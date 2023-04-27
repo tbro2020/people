@@ -35,13 +35,23 @@ class Exit(BaseModel):
                 'method': 'GET',
                 'href': reverse_lazy('core:delete', kwargs={'app': 'exit', 'model': 'exit'}),
                 'class': 'btn btn-danger',
-                'title': 'Delete'
+                'title': 'Delete',
+                'condition': 'True'
             }, {
                 'method': 'GET',
                 'href': reverse_lazy('core:document',
                                      kwargs={'app': 'exit', 'model': 'exit', 'document': 'exit'}),
                 'class': 'btn btn-info',
-                'title': 'Document'
+                'title': 'Document',
+                'condition': 'obj.approved()'
+            }, {
+                'method': 'POST',
+                'href': reverse_lazy('core:action', kwargs={'app': 'exit', 'model': 'exit', 'action': 'Approver'}),
+                'class': 'btn btn-warning',
+                'title': 'Approver',
+                'condition': 'request.user.employee in obj.approvers() and request.user.employee not in '
+                             'obj.approvals',
+                'statement': 'obj.approve(request)'
             }]
         },
         'create': {

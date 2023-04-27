@@ -4,12 +4,20 @@ from django.db import models
 
 from django.contrib.auth.models import AbstractUser
 from core.managers import UserManager
+from django.contrib import messages
 
 from django_currentuser.db.models import CurrentUserField
 
 
 def upload_directory_file(instance, filename):
     return '{0}/{1}/{2}'.format(instance._meta.app_label, instance._meta.model_name, filename)
+
+
+def MODEL_CHOICES():
+    data = [('exit.exit', 'Approbation sur la sortie'), ('leave.leave', 'Approbation sur le congé'),
+            ('logistic.requisition', 'Approbation sur requisition'),
+            ('social.fundrequest', 'Approbation sur demande de fonds')]
+    return data
 
 
 class User(AbstractUser):
@@ -36,7 +44,23 @@ class Announcement(models.Model):
 
     conf = {
         'icon': 'mic',
-        'entry': reverse_lazy('core:announcement-list')
+        'entry': reverse_lazy('core:list', kwargs={'app': 'core', 'model': 'announcement'}),
+        'list': {
+            'display': [('title', 'Titre'), ('broadcast', 'Diffuser'), ('updated', 'Mis à jour le')],
+            'filter': [],
+            'action': [{
+                'method': 'GET',
+                'href': reverse_lazy('core:create', kwargs={'app': 'core', 'model': 'announcement'}),
+                'class': 'btn btn-primary',
+                'title': 'Ajouter'
+            }]
+        },
+        'create': {
+            'form': {
+                'fields': ['title', 'doc', 'broadcast', 'description'],
+                'inlines': []
+            }
+        }
     }
 
     def __str__(self):
@@ -61,7 +85,12 @@ class Notification(models.Model):
 
     conf = {
         'icon': 'bell',
-        'entry': reverse_lazy('core:notification-list')
+        'entry': reverse_lazy('core:list', kwargs={'app': 'core', 'model': 'notification'}),
+        'list': {
+            'display': [('message', 'Message'), ('target', 'Cible'), ('visited', 'Visité'), ('updated', 'Mis à jour le')],
+            'filter': ['visited'],
+            'action': []
+        }
     }
 
     class Meta:
@@ -69,8 +98,7 @@ class Notification(models.Model):
 
 
 class Approver(models.Model):
-    MODELS = ()
-    model = models.CharField(verbose_name='Model', max_length=30, choices=MODELS)
+    model = models.CharField(verbose_name='Model', max_length=30, choices=MODEL_CHOICES())
     employee = models.ForeignKey('employee.Employee', verbose_name='Employee', null=True, on_delete=models.SET_NULL)
 
     updated = models.DateTimeField(verbose_name="Mise à jour le", auto_now=True)
@@ -81,12 +109,11 @@ class Approver(models.Model):
 
     class Meta:
         verbose_name = 'Approbateur'
-        #unique_together = ('model', 'employee',)
+        # unique_together = ('model', 'employee',)
 
 
 class Approval(models.Model):
-    MODELS = ()
-    model = models.CharField(verbose_name='Model', max_length=30, choices=MODELS)
+    model = models.CharField(verbose_name='Model', max_length=30, choices=MODEL_CHOICES())
     _pk = models.IntegerField(verbose_name='Identifiant unique')
 
     approved_by = models.ForeignKey('employee.Employee', verbose_name='Employee', null=True, on_delete=models.SET_NULL)
@@ -107,18 +134,27 @@ class BaseModel(models.Model):
     created = models.DateTimeField(verbose_name="Créée le", auto_now_add=True)
 
     def approvers(self):
-        app_label, model_name  = self._meta.app_label, self._meta.model_name
-        qs = Approver.objects.filter(model=f'{app_label}.{model_name}').values_list('employee', flat=True)
+        app_label, model_name = self._meta.app_label, self._meta.model_name
+        qs = Approver.objects.select_related().filter(model=f'{app_label}.{model_name}').values_list('employee', flat=True)
         return apps.get_model('employee', model_name='employee').objects.filter(id__in=qs)
 
+    @property
     def approvals(self):
         app_label, model_name = self._meta.app_label, self._meta.model_name
-        qs = Approval.objects.filter(model=f'{app_label}.{model_name}', _pk=self.pk).values_list('approved_by', flat=True)
+        qs = Approval.objects.select_related().filter(model=f'{app_label}.{model_name}', _pk=self.pk).values_list('approved_by', flat=True)
         return apps.get_model('employee', model_name='employee').objects.filter(id__in=qs)
 
     def approved(self):
         approvers = self.approvers().count()
-        return approvers > 0 and approvers == self.approvals().count()
+        return approvers == self.approvals.count()
+
+    def approve(self, request):
+        app_label, model_name = self._meta.app_label, self._meta.model_name
+        obj, created = Approval.objects.get_or_create(**{'model': f'{app_label}.{model_name}', '_pk': self.pk, 'approved_by': request.user.employee})
+        if not created: return False
+        messages.add_message(request, level=messages.SUCCESS, message=f'{self._meta.verbose_name} #{self.id} has been approved')
+        return True
+
 
     class Meta:
         abstract = True
