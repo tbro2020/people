@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+{% load core %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col">
+            <h2 class="m-0">{{ model|getattr:'_meta'|getattr:'verbose_name_plural'|title }}</h2>
+
+            <nav aria-label="breadcrumb">
+              <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'core:list' model|getattr:'_meta'|getattr:'app_label' model|getattr:'_meta'|getattr:'model_name' %}" class="text-decoration-none">Liste</a></li>
+              </ol>
+            </nav>
+        </div>
+
+        <div class="col text-end">
+            {% for btn in model.conf.list.action %}
+                {% if btn.method == 'GET' %}
+                    <a href="{{ btn.href }}?{% for key, value in request.GET.items %}{{ key }}={{ value }}{% endfor %}" class="{{ btn.class }}">{{ btn.title }}</a>
+                {% elif btn.method == 'POST' %}
+                    <form action="{{ btn.href }}" method="{{ btn.method }}" style="display: initial">
+                        {% csrf_token %}
+                        {% for key, value in btn.values.items %}<input type="hidden" name="{{ key }}" value="{{ value }}">{% endfor %}
+                        <button type="submit" class="{{ btn.class }}">{{ btn.title }}</button>
+                    </form>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        {% if filter_form %}
+        <div class="col-2">
+            <div class="card">
+                <div class="card-header">
+                    Filtre
+                </div>
+                <div class="card-body">
+                    <p>{{ filter_form|crispy }}</p>
+                </div>
+            </div>
+        </div>
+        {% elif model.conf.description %}
+        <div class="col-2">
+            <div class="card">
+                <div class="card-header">
+                    Description
+                </div>
+                <div class="card-body">
+                    <p>{{ model.conf.description }}</p>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        <div class="col">
+            <div class="card">
+                <div class="card-header">
+                    <form method="get" class="input-group">
+                        <span class="input-group-text" id="basic-addon1"><i data-feather="search" class="small-icon"></i></span>
+                        <input type="text" class="form-control" placeholder="Recherche..." name="q" value="{{ request.GET.q }}">
+                    </form>
+                </div>
+                <div class="card-body">
+                    <table class="table table-hover table-responsive">
+                        <thead>
+                            <tr>
+                                {% for field in model.conf.list.display %}
+                                    <th>{{ field.1 }}</th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for obj in qs %}<tr data-url='{% url 'core:change' model|getattr:'_meta'|getattr:'app_label' model|getattr:'_meta'|getattr:'model_name' %}?pk={{ obj.id }}'>
+                                {% for field in model.conf.list.display %}
+                                    <td>{{ obj|getattr:field.0 }}</td>
+                                {% endfor %}</tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="{{ model.conf.list.display|length }}" class="text-center">
+                                    <i data-feather="{{ model.conf.icon }}"></i>
+                                    <h3 class="m-0">No {{ model|getattr:'_meta'|getattr:'verbose_name' }} found</h3>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

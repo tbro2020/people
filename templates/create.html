@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+
+{% load core %}
+{% load crispy_forms_tags %}
+{% load crispy_forms_filters %}
+
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col">
+            <h2 class="m-0">{{ model|getattr:'_meta'|getattr:'verbose_name_plural'|title }}</h2>
+            <nav aria-label="breadcrumb">
+              <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'core:list' model|getattr:'_meta'|getattr:'app_label' model|getattr:'_meta'|getattr:'model_name' %}" class="text-decoration-none">Liste</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Create</li>
+              </ol>
+            </nav>
+        </div>
+        <div class="col text-end">
+            {% for btn in model.conf.create.action %}
+                {% if btn.method == 'GET' %}
+                    <a href="{{ btn.href }}?pk={{ obj.id }}" class="{{ btn.class }}">{{ btn.title }}</a>
+                {% elif btn.method == 'POST' %}
+                    <form action="{{ btn.href }}?pk={{ obj.id }}" method="{{ btn.method }}" style="display: initial">
+                        {% csrf_token %}
+                        {% for key, value in btn.values.items %}<input type="hidden" name="{{ key }}" value="{{ value }}">{% endfor %}
+                        <button type="submit" class="{{ btn.class }}">{{ btn.title }}</button>
+                    </form>
+                {% endif %}
+            {% endfor %}
+            <button class="btn btn-success" type="submit" form="form-{{ model|getattr:'_meta'|getattr:'model_name' }}">Soumettre</button>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        {% if filter_form and not inlines %}
+        <div class="col-2">
+            <div class="card">
+                <div class="card-header">
+                    Filtre
+                </div>
+                <div class="card-body">
+                    <p>{{ filter_form|crispy }}</p>
+                </div>
+            </div>
+        </div>
+        {% elif model.conf.description and not inlines %}
+        <div class="col-2">
+            <div class="card">
+                <div class="card-header">
+                    Description
+                </div>
+                <div class="card-body">
+                    <p class="p-3 pb-2">{{ model.conf.description }}</p>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+
+        <form class="col" method="post" id="form-{{ model|getattr:'_meta'|getattr:'model_name' }}" enctype="multipart/form-data">
+            <div class="row">
+                <div class="col{% if inlines %}-8{% endif %}">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="m-0">{{ model|getattr:'_meta'|getattr:'verbose_name'|title }}</h3>
+                        </div>
+                        <div class="card-body">
+                            {% crispy form %}
+                        </div>
+                    </div>
+                </div>
+                {% if inlines %}
+                    {% for inline in inlines %}
+                    <div class="col-4">
+                        {{ inline.non_form_errors }}
+                        {{ inline.management_form }}
+                        <div class="card mb-3">
+                            <div class="card-header">
+                                <h3 class="m-0">{{ inline|getattr:'__class__'|getattr:'model'|getattr:'_meta'|getattr:'verbose_name_plural'|title }}</h3>
+                            </div>
+                            <div class="card-body">
+                                {% crispy inline %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

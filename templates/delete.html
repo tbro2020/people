@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% load core %}
+{% load crispy_forms_tags %}
+{% load crispy_forms_filters %}
+
+{% block content %}
+<div class="pt-2 ps-3 pe-3">
+    <div class="row">
+        <div class="col">
+            <h2 class="fw-bolder text-capitalize">{{ model|getattr:'_meta'|getattr:'verbose_name' }}</h2>
+
+            <nav aria-label="breadcrumb">
+              <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'core:list' model|getattr:'_meta'|getattr:'app_label' model|getattr:'_meta'|getattr:'model_name' %}" class="text-decoration-none">Liste</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'core:change' model|getattr:'_meta'|getattr:'app_label' model|getattr:'_meta'|getattr:'model_name' %}?pk={{ obj.id }}" class="text-decoration-none">{{ model|getattr:'_meta'|getattr:'verbose_name' }}#{{ obj.id }}</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Supprimer</li>
+              </ol>
+            </nav>
+        </div>
+        <div class="col text-end">
+            <button onclick="history.back()" class="btn btn-success">Annuler</button>
+            <button type="submit" class="btn btn-danger" form="form-{{ model|getattr:'_meta'|getattr:'model_name' }}">Accepter</button>
+        </div>
+    </div>
+
+    <div class="col">
+        <form id="form-{{ model|getattr:'_meta'|getattr:'model_name' }}" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <h2 class="text-danger">Êtes-vous sûr de cette action ?</h2>
+            <div class="alert alert-danger">
+                {{ form|crispy }}
+            </div>
+            <dl class="row">
+                {% for field in model|getattr:"_meta"|getattr:"fields" %}
+                    {% with obj|getattr:field.name as value %}
+                        {% if value %}
+                            <dt class="col-sm-3 text-capitalized">{{ field.verbose_name }}</dt>
+                            <dd class="col-sm-9">{{ value }}</dd>
+                        {% endif %}
+                    {% endwith %}
+                {% endfor %}
+            </dl>
+        </form>
+    </div>
+</div>
+{% endblock %}
