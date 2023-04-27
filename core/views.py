@@ -13,7 +13,7 @@ from core.filters import filterset_factory
 class Home(LoginRequiredMixin, View):
     def get(self, request):
         cards = {model._meta.verbose_name_plural: model.objects.all().count() for model in apps.get_models()}
-        return render(request, f'{self.__class__.__name__}.html', locals())
+        return render(request, f'{self.__class__.__name__.lower()}.html', locals())
 
 
 class Read(LoginRequiredMixin, View):
