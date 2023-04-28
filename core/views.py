@@ -12,8 +12,10 @@ from core.filters import filterset_factory
 
 Notification = apps.get_model('core', model_name='notification')
 
+
 class Home(LoginRequiredMixin, View):
     def get(self, request):
+        leaves = apps.get_model('leave', model_name='leave').objects.select_related().all()
         cards = {model._meta.verbose_name_plural: model.objects.all().count() for model in apps.get_models()}
         return render(request, f'{self.__class__.__name__.lower()}.html', locals())
 
@@ -73,12 +75,12 @@ class Create(LoginRequiredMixin, View):
             _fields = inline.get('fields', '__all__')
             _model = apps.get_model(inline.get('app'), model_name=inline.get('model'))
             _form = inlineformset_factory(model, _model, form=InlineForm, fields=_fields, extra=1)(request.POST or None,
-                                                                                  request.FILES or None)
+                                                                                                   request.FILES or None)
             inlines.append(_form)
 
         if not form.is_valid() or False in [inline.is_valid() for inline in inlines]:
             for error in form.errors: messages.add_message(request, messages.ERROR, message=error)
-            return render(request, f'{self.__class__.__name__}.html', locals())
+            return render(request, f'{self.__class__.__name__.lower()}.html', locals())
 
         form.save()
         [inline.save() for inline in inlines]
@@ -115,7 +117,8 @@ class Change(LoginRequiredMixin, View):
         for inline in getattr(model, 'conf', {}).get('change', {}).get('form', {}).get('inlines', []):
             _fields = inline.get('fields', '__all__')
             _model = apps.get_model(inline.get('app'), model_name=inline.get('model'))
-            _form = inlineformset_factory(model, _model, form=Row3Form, fields=_fields, exclude=(model._meta.model_name,), extra=1, can_delete=True)(instance=obj)
+            _form = inlineformset_factory(model, _model, form=Row3Form, fields=_fields,
+                                          exclude=(model._meta.model_name,), extra=1, can_delete=True)(instance=obj)
             inlines.append(_form)
         return render(request, f'{self.__class__.__name__.lower()}.html', locals())
 
@@ -132,13 +135,13 @@ class Change(LoginRequiredMixin, View):
             _fields = inline.get('fields', '__all__')
             _model = apps.get_model(inline.get('app'), model_name=inline.get('model'))
             _form = inlineformset_factory(model, _model, form=InlineForm, fields=_fields, extra=1)(request.POST or None,
-                                                                                  request.FILES or None,
-                                                                                  instance=obj)
+                                                                                                   request.FILES or None,
+                                                                                                   instance=obj)
             inlines.append(_form)
 
         if not form.is_valid() or False in [inline.is_valid() for inline in inlines]:
             for error in form.errors: messages.add_message(request, messages.ERROR, message=error.as_text())
-            return render(request, f'{self.__class__.__name__}.html', locals())
+            return render(request, f'{self.__class__.__name__.lower()}.html', locals())
 
         form.save()
         [inline.save() for inline in inlines]
@@ -153,19 +156,19 @@ class Delete(LoginRequiredMixin, View):
         model = apps.get_model(app, model_name=model)
         obj = get_object_or_404(model, **request.GET.dict())
         form = AcceptForm()
-        return render(request, f'{self.__class__.__name__}.html', locals())
+        return render(request, f'{self.__class__.__name__.lower()}.html', locals())
 
     def post(self, request, app, model):
         model = apps.get_model(app, model_name=model)
         obj = get_object_or_404(model, **request.GET.dict())
         form = AcceptForm(request.POST or None, request.FILES or None)
         if not form.is_valid():
-            return render(request, f'{self.__class__.__name__}.html', locals())
+            return render(request, f'{self.__class__.__name__.lower()}.html', locals())
         data = form.cleaned_data
         if not data.get('accept', False):
             messages.add_message(request, level=messages.WARNING, message=f'Please check the `accept` field to delete '
                                                                           f'the {model._meta.verbose_name} #{obj.id}')
-            return render(request, f'{self.__class__.__name__}.html', locals())
+            return render(request, f'{self.__class__.__name__.lower()}.html', locals())
         obj.delete()
         return redirect(reverse('core:list', kwargs={'app': app, 'model': model._meta.model_name}))
 

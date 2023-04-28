@@ -135,6 +135,7 @@ class BaseModel(models.Model):
 
     def approvers(self):
         app_label, model_name = self._meta.app_label, self._meta.model_name
+        # filtre [service, subdirection, direction]
         qs = Approver.objects.select_related().filter(model=f'{app_label}.{model_name}').values_list('employee', flat=True)
         return apps.get_model('employee', model_name='employee').objects.filter(id__in=qs)
 

@@ -2,7 +2,9 @@ from django.db import models
 from django.urls import reverse_lazy
 
 from core.models import BaseModel
+from django import forms
 
+from datetime import date
 
 def upload_directory_file(instance, filename):
     return '{0}/{1}/{2}'.format(instance._meta.app_label, instance._meta.model_name, filename)
@@ -84,6 +86,17 @@ class Leave(BaseModel):
 
     def __str__(self):
         return f"Congé de {self.employee} du {self.start_period} au {self.end_period}"
+
+    def clean(self):
+        today = date.today()
+        count_days = 0
+        max_days = self.type_of.days
+        taken = Leave.objects.filter(created_by=self.created_by, created__year=today.year)
+        for take in taken: count_days += (take.end_period-take.start_period).days
+        left_days = max_days-count_days
+
+        if (self.end_period - self.start_period).days > left_days:
+            raise forms.ValidationError(f"You have {left_days} days left on you {self.type_of.name}")
 
     class Meta:
         verbose_name = "Congé"

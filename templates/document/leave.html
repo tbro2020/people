@@ -37,6 +37,17 @@
           <p>Fait à {{ obj.employee.place|default:'Kinshasa' }}, Le {{ obj.created.date }}</p>
       </div>
 
+      <div class="row">
+          {% for approve in obj.approvals %}
+          <div class="col">
+              <p>
+                  {{ approve.function }}<br/>
+                  {{ approve.full_name }}
+              </p>
+          </div>
+          {% endfor %}
+      </div>
+
   </div>
 </body>
 </html>

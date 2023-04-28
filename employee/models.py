@@ -152,6 +152,7 @@ class Employee(models.Model):
     marital_status = models.CharField("Etat civil", max_length=12,
                                       choices=(("Maried", "Marie"), ("Single", "Celibataire"), ("Widower", "Veuf(ve)")),
                                       default="Celibataire")
+    spouse = models.CharField("Nom du cojoint(e)", max_length=100, blank=True, null=True, default=None)
 
     dob = models.DateField("Date de naissance", help_text='YYYY-MM-DD', blank=True, null=True, default=None)
     doj = models.DateField("Date d'entrée en fonction", help_text='YYYY-MM-DD', blank=True, null=True, default=None)
@@ -194,7 +195,7 @@ class Employee(models.Model):
                 'fields': ['direction', 'subDirection', 'service', 'function',
                            'grade', 'matricule', 'agreement', 'branch',
                            'profile', 'last_name', 'middle_name', 'first_name', 'dob',
-                           'gender', 'marital_status', 'mobile_number', 'address',
+                           'gender', 'marital_status', 'spouse', 'mobile_number', 'address',
                            'doj', 'n_cnss', 'n_inpp', 'n_onem',
                            'payment_method', 'pay_account', 'payer_name', 'emergency_information', 'comment', 'status'],
                 'inlines': [{
@@ -221,7 +222,8 @@ class Employee(models.Model):
                 'method': 'GET',
                 'href': reverse_lazy('core:document', kwargs={'app': 'employee', 'model': 'employee', 'document': 'employee'}),
                 'class': 'btn btn-info',
-                'title': 'Document'
+                'title': 'Document',
+                'condition': 'True'
             }]
         },
         'create': {
@@ -229,7 +231,7 @@ class Employee(models.Model):
                 'fields': ['direction', 'subDirection', 'service', 'function',
                            'grade', 'matricule', 'agreement', 'branch',
                            'profile', 'last_name', 'middle_name', 'first_name', 'dob',
-                           'gender', 'marital_status', 'mobile_number', 'address',
+                           'gender', 'marital_status', 'spouse', 'mobile_number', 'address',
                            'doj', 'n_cnss', 'n_inpp', 'n_onem',
                            'payment_method', 'pay_account', 'payer_name', 'emergency_information', 'comment', 'status'],
                 'inlines': []

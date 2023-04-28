@@ -1,12 +1,25 @@
 {% extends 'base.html' %}
 
 {% load core %}
+
+{% block header %}
+<!-- Add the evo-calendar.css for styling -->
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/evo-calendar@1.1.2/evo-calendar/css/evo-calendar.min.css"/>
+<!-- Add the evo-calendar.js for.. obviously, functionality! -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/evo-calendar@1.1.2/evo-calendar/js/evo-calendar.min.js"></script>
+{% endblock %}
+
 {% block content %}
 <div class="container-fluid">
 
-    <h2 class="m-0">Home</h2>
+    <h1 class="m-0">Accueil</h1>
 
-    <div class="col mt-4">
+    <div class="col mt-3">
+        <div class="col rounded" id="calendar"></div>
+    </div>
+
+    <div class="col mt-5">
         <div class="row">
             {% for key, value in cards.items %}
                 <div class="col-3 mb-3">
@@ -21,4 +34,37 @@
         </div>
     </div>
 </div>
+
+{{ event|json_script:"py_dict" }}
+
+<script>
+var today = new Date();
+$(document).ready(function() {
+    $("#calendar").evoCalendar({
+        'language': 'en',
+        format: "MM dd, yyyy",
+        titleFormat: "MM",
+        calendarEvents: [{
+            id: "d8jai7s",
+            name: "Author's Birthday",
+            description: "Author's note: Thank you for using EvoCalendar! :)",
+            date: "April/15/2023",
+            type: "birthday",
+            everyYear: !0
+        }, {
+            id: "in8bha4",
+            name: "Holiday #2",
+            description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+            date: today,
+            type: "holiday"
+        }, {
+            id: "in8bha4",
+            name: "Event #2",
+            date: today,
+            type: "event"
+        }]
+    });
+});
+</script>
+
 {% endblock %}
