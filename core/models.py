@@ -7,6 +7,8 @@ from core.managers import UserManager
 from django.contrib import messages
 
 from django_currentuser.db.models import CurrentUserField
+from functools import reduce
+import operator
 
 
 def upload_directory_file(instance, filename):
@@ -135,8 +137,13 @@ class BaseModel(models.Model):
 
     def approvers(self):
         app_label, model_name = self._meta.app_label, self._meta.model_name
-        # filtre [service, subdirection, direction]
-        qs = Approver.objects.select_related().filter(model=f'{app_label}.{model_name}').values_list('employee', flat=True)
+        user = self.created_by
+
+        data = {'employee__branch': user.employee.branch,'employee__direction': user.employee.direction,'employee__subDirection': user.employee.subDirection, 'employee__service': user.employee.service}
+        data = {key: value for key, value in data if value}
+
+        qs = Approver.objects.select_related().filter(model=f'{app_label}.{model_name}')\
+            .filter(reduce(operator.or_, (models.Q(**d) for d in (dict([i]) for i in data.items())))).values_list('employee', flat=True)
         return apps.get_model('employee', model_name='employee').objects.filter(id__in=qs)
 
     @property
