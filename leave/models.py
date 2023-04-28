@@ -85,7 +85,7 @@ class Leave(BaseModel):
     }
 
     def __str__(self):
-        return f"Congé de {self.employee} du {self.start_period} au {self.end_period}"
+        return f"Congé de {self.created_by} du {self.start_period} au {self.end_period}"
 
     def clean(self):
         today = date.today()

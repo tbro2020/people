@@ -140,7 +140,7 @@ class BaseModel(models.Model):
         user = self.created_by
 
         data = {'employee__branch': user.employee.branch,'employee__direction': user.employee.direction,'employee__subDirection': user.employee.subDirection, 'employee__service': user.employee.service}
-        data = {key: value for key, value in data if value}
+        data = {key: value for key, value in data.items() if value}
 
         qs = Approver.objects.select_related().filter(model=f'{app_label}.{model_name}')\
             .filter(reduce(operator.or_, (models.Q(**d) for d in (dict([i]) for i in data.items())))).values_list('employee', flat=True)
