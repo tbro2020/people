@@ -36,3 +36,9 @@ urlpatterns = [
 urlpatterns += staticfiles_urlpatterns()
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
+# ---------------------------------------------------
+admin.site.site_header = "People.HR"
+admin.site.index_title = "Tableau de bord"
+admin.site.site_title = "People.HR"
+admin.site.site_url = None
+# ---------------------------------------------------
