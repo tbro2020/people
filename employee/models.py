@@ -1,8 +1,8 @@
 from phonenumber_field.modelfields import PhoneNumberField
-from django.contrib.auth import get_user_model
 from django.urls import reverse_lazy
 from django.db import models
 from django.apps import apps
+from datetime import date
 
 
 def upload_directory_file(instance, filename):
@@ -236,6 +236,16 @@ class Employee(models.Model):
                            'payment_method', 'pay_account', 'payer_name', 'emergency_information', 'comment', 'status'],
                 'inlines': []
             }
+        },
+        'read': {
+            'action': [{
+                'method': 'GET',
+                'href': reverse_lazy('core:document',
+                                     kwargs={'app': 'employee', 'model': 'employee', 'document': 'employee'}),
+                'class': 'btn btn-info',
+                'title': 'Document',
+                'condition': 'True'
+            }]
         }
     }
 

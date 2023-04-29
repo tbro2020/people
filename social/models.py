@@ -67,5 +67,18 @@ class FundRequest(BaseModel):
                 'fields': ['doc', 'currency', 'amount', 'description'],
                 'inlines': []
             }
+        },
+        'read': {
+            'action': [{
+                'method': 'GET',
+                'href': reverse_lazy('core:document',
+                                     kwargs={'app': 'social', 'model': 'fundrequest', 'document': 'fundrequest'}),
+                'class': 'btn btn-info',
+                'title': 'Document',
+                'condition': 'True'
+            }]
         }
     }
+
+    class Meta:
+        verbose_name = 'Demande de fond'

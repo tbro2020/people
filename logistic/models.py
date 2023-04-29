@@ -56,6 +56,16 @@ class Requisition(BaseModel):
                 'fields': ['name'],
                 'inlines': []
             }
+        },
+        'read': {
+            'action': [{
+                'method': 'GET',
+                'href': reverse_lazy('core:document',
+                                     kwargs={'app': 'logistic', 'model': 'requisition', 'document': 'requisition'}),
+                'class': 'btn btn-info',
+                'title': 'Document',
+                'condition': 'True'
+            }]
         }
     }
 

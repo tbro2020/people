@@ -19,6 +19,17 @@
             </nav>
         </div>
         <div class="col text-end">
+            {% for btn in model.conf.read.action %}
+                {% if btn.method == 'GET' and request|stack:obj|eval:btn.condition %}
+                    <a href="{{ btn.href }}?pk={{ obj.id }}" class="{{ btn.class }}">{{ btn.title }}</a>
+                {% elif btn.method == 'POST' and request|stack:obj|eval:btn.condition %}
+                    <form action="{{ btn.href }}?pk={{ obj.id }}" method="{{ btn.method }}" style="display: initial">
+                        {% csrf_token %}
+                        {% for key, value in btn.values.items %}<input type="hidden" name="{{ key }}" value="{{ value }}">{% endfor %}
+                        <button type="submit" class="{{ btn.class }}">{{ btn.title }}</button>
+                    </form>
+                {% endif %}
+            {% endfor %}
             <button onclick="history.back()" class="btn btn-success">Annuler</button>
         </div>
     </div>

@@ -6,6 +6,7 @@ from django import forms
 
 from datetime import date
 
+
 def upload_directory_file(instance, filename):
     return '{0}/{1}/{2}'.format(instance._meta.app_label, instance._meta.model_name, filename)
 
@@ -81,6 +82,16 @@ class Leave(BaseModel):
                 'fields': ['type_of', 'start_period', 'end_period', 'document', 'reason', 'observation'],
                 'inlines': []
             }
+        },
+        'read': {
+            'action': [{
+                'method': 'GET',
+                'href': reverse_lazy('core:document',
+                                     kwargs={'app': 'leave', 'model': 'leave', 'document': 'leave'}),
+                'class': 'btn btn-info',
+                'title': 'Document',
+                'condition': 'True'
+            }]
         }
     }
 
@@ -92,8 +103,8 @@ class Leave(BaseModel):
         count_days = 0
         max_days = self.type_of.days
         taken = Leave.objects.filter(created_by=self.created_by, created__year=today.year)
-        for take in taken: count_days += (take.end_period-take.start_period).days
-        left_days = max_days-count_days
+        for take in taken: count_days += (take.end_period - take.start_period).days
+        left_days = max_days - count_days
 
         if (self.end_period - self.start_period).days > left_days:
             raise forms.ValidationError(f"You have {left_days} days left on you {self.type_of.name}")

@@ -59,6 +59,16 @@ class Exit(BaseModel):
                 'fields': ['exit_time', 'reason', 'destination', 'return_time', 'observation'],
                 'inlines': []
             }
+        },
+        'read': {
+            'action': [{
+                'method': 'GET',
+                'href': reverse_lazy('core:document',
+                                     kwargs={'app': 'exit', 'model': 'exit', 'document': 'exit'}),
+                'class': 'btn btn-info',
+                'title': 'Document',
+                'condition': 'True'
+            }]
         }
     }
 

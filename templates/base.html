@@ -29,48 +29,52 @@
 </head>
 <body>
     <main>
-        <div class="d-flex flex-column flex-shrink-0 bg-primary" style="width: 4.5rem;">
-        <a href="/" class="d-block p-3 link-dark text-decoration-none" title="" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title="Treize">
-          <span class="badge text-bg-light">
-              <i data-feather="users" class="text-primary"></i>
-          </span>
-          <span class="visually-hidden">Treize</span>
-        </a>
-        <ul class="nav nav-pills nav-flush flex-column mb-auto text-center">
-            <li class="nav-item">
-                <a href="{% url 'core:home' %}" class="nav-link border-primary text-light {% if request.resolver_match.url_name == 'home' %}active{% endif %} py-3 border-bottom" aria-current="page" title="" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title="Home">
-                  <i data-feather="home"></i>
-                </a>
-            </li>
+        <div class="d-flex flex-column flex-shrink-0 p-3 text-white bg-dark" style="width: 200px;">
+            <a href="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
+              <i data-feather="users"></i>
+              <span class="fs-4 ms-2">People</span>
+            </a>
+            <hr>
+            <ul class="nav nav-pills flex-column mb-auto">
 
-            {% with request|menu as menus %}
-                {% for app, models in menus.items %}
-                    {% for model in models %}
-                        <li class="nav-item">
-                            <a href="{{ model.url }}" class="nav-link text-light {% if request.resolver_match.kwargs.model == model.name %}active{% endif %} py-3" title="{{ model.verbose|title }}" data-bs-toggle="tooltip" data-bs-placement="right" data-bs-original-title="{{ model.verbose|title }}">
-                                <i data-feather="{{ model.icon|default:'user' }}"></i>
-                                {% if model.badge %}
-                                    <span class="badge rounded-pill badge-notification bg-danger toggle-badge">
-                                        {{ model.badge }}
-                                    </span>
-                                {% endif %}
-                            </a>
-                        </li>
+                <li class="nav-item">
+                    <a href="{% url 'core:home' %}" class="nav-link text-light {% if request.resolver_match.url_name == 'home' %}active{% endif %} py-3">
+                        <i data-feather="home"></i>
+                        <span class="fs-6 ms-2">Home</span>
+                    </a>
+                </li>
+
+                {% with request|menu as menus %}
+                    {% for key, value in menus.items %}
+                    <li class="nav-item fs-5 mt-2">
+                        <a class="text-decoration-none nav-link text-white" aria-current="page">{{ key|title }}</a>
+                        <ul class="nav nav-pills flex-column mb-auto ms-3">
+                            {% for model in value %}
+                                <li class="nav-item">
+                                    <a href="{{ model.url }}" class="nav-link text-light {% if request.resolver_match.kwargs.model == model.name %}active{% endif %} py-3">
+                                        <i data-feather="{{ model.icon|default:'user' }}" style="width: 12px;"></i>
+                                        {{ model.verbose|title }}
+                                    </a>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </li>
                     {% endfor %}
-                {% endfor %}
-            {% endwith %}
-        </ul>
+                {% endwith %}
 
-        <div class="dropdown border-top border-primary">
-          <a href="#" class="d-flex text-light align-items-center justify-content-center p-3 link-dark text-decoration-none dropdown-toggle" id="dropdownUser3" data-bs-toggle="dropdown" aria-expanded="false">
-            <i data-feather="user" class="text-light"></i>
-          </a>
-          <ul class="dropdown-menu text-small shadow" aria-labelledby="dropdownUser3">
-            <li><a class="dropdown-item" href="{% url 'password_change' %}">Update password</a></li>
-            <li><hr class="dropdown-divider"></li>
-            <li><a class="dropdown-item" href="{% url 'logout' %}">Sign out</a></li>
-          </ul>
-        </div>
+            </ul>
+            <hr>
+            <div class="dropdown">
+              <a class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
+                <i data-feather="user" class="text-light"></i>
+                  {{ request.user.employee.full_name|default:request.user.username }}
+              </a>
+              <ul class="dropdown-menu dropdown-menu-dark text-small shadow" aria-labelledby="dropdownUser1">
+                <li><a class="dropdown-item" href="{% url 'password_change' %}">Update password</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="{% url 'logout' %}">Sign out</a></li>
+              </ul>
+            </div>
         </div>
 
         <div class="b-example-divider"></div>

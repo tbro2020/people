@@ -89,7 +89,8 @@ class Notification(models.Model):
         'icon': 'bell',
         'entry': reverse_lazy('core:list', kwargs={'app': 'core', 'model': 'notification'}),
         'list': {
-            'display': [('message', 'Message'), ('target', 'Cible'), ('visited', 'Visité'), ('updated', 'Mis à jour le')],
+            'display': [('message', 'Message'), ('target', 'Cible'), ('visited', 'Visité'),
+                        ('updated', 'Mis à jour le')],
             'filter': ['visited'],
             'action': []
         }
@@ -139,17 +140,20 @@ class BaseModel(models.Model):
         app_label, model_name = self._meta.app_label, self._meta.model_name
         user = self.created_by
 
-        data = {'employee__branch': user.employee.branch,'employee__direction': user.employee.direction,'employee__subDirection': user.employee.subDirection, 'employee__service': user.employee.service}
+        data = {'employee__branch': user.employee.branch, 'employee__direction': user.employee.direction,
+                'employee__subDirection': user.employee.subDirection, 'employee__service': user.employee.service}
         data = {key: value for key, value in data.items() if value}
 
-        qs = Approver.objects.select_related().filter(model=f'{app_label}.{model_name}')\
-            .filter(reduce(operator.or_, (models.Q(**d) for d in (dict([i]) for i in data.items())))).values_list('employee', flat=True)
+        qs = Approver.objects.select_related().filter(model=f'{app_label}.{model_name}') \
+            .filter(reduce(operator.or_, (models.Q(**d) for d in (dict([i]) for i in data.items())))).values_list(
+            'employee', flat=True)
         return apps.get_model('employee', model_name='employee').objects.filter(id__in=qs)
 
     @property
     def approvals(self):
         app_label, model_name = self._meta.app_label, self._meta.model_name
-        qs = Approval.objects.select_related().filter(model=f'{app_label}.{model_name}', _pk=self.pk).values_list('approved_by', flat=True)
+        qs = Approval.objects.select_related().filter(model=f'{app_label}.{model_name}', _pk=self.pk).values_list(
+            'approved_by', flat=True)
         return apps.get_model('employee', model_name='employee').objects.filter(id__in=qs)
 
     def approved(self):
@@ -158,11 +162,12 @@ class BaseModel(models.Model):
 
     def approve(self, request):
         app_label, model_name = self._meta.app_label, self._meta.model_name
-        obj, created = Approval.objects.get_or_create(**{'model': f'{app_label}.{model_name}', '_pk': self.pk, 'approved_by': request.user.employee})
+        obj, created = Approval.objects.get_or_create(
+            **{'model': f'{app_label}.{model_name}', '_pk': self.pk, 'approved_by': request.user.employee})
         if not created: return False
-        messages.add_message(request, level=messages.SUCCESS, message=f'{self._meta.verbose_name} #{self.id} has been approved')
+        messages.add_message(request, level=messages.SUCCESS,
+                             message=f'{self._meta.verbose_name} #{self.id} has been approved')
         return True
-
 
     class Meta:
         abstract = True

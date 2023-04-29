@@ -9,13 +9,13 @@ from django.apps import apps
 from django.forms import modelform_factory, inlineformset_factory
 from core.forms import AcceptForm, Row3Form, InlineForm
 from core.filters import filterset_factory
+from datetime import date
 
 Notification = apps.get_model('core', model_name='notification')
 
 
 class Home(LoginRequiredMixin, View):
     def get(self, request):
-        leaves = apps.get_model('leave', model_name='leave').objects.select_related().all()
         cards = {model._meta.verbose_name_plural: model.objects.all().count() for model in apps.get_models()}
         return render(request, f'{self.__class__.__name__.lower()}.html', locals())
 
@@ -106,8 +106,10 @@ class Change(LoginRequiredMixin, View):
         model = apps.get_model(app, model_name=model)
         obj = get_object_or_404(model, **request.GET.dict())
 
-        # if change does not exist return to view
         if 'change' not in getattr(model, 'conf', {}):
+            return redirect(f"{reverse('core:read', kwargs={'app': app, 'model': model._meta.model_name})}?pk={obj.id}")
+
+        if hasattr(obj, 'approved') and obj.approved and request.user.employee not in obj.approvers():
             return redirect(f"{reverse('core:read', kwargs={'app': app, 'model': model._meta.model_name})}?pk={obj.id}")
 
         inlines = []
