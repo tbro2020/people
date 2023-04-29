@@ -9,13 +9,14 @@ from django.apps import apps
 from django.forms import modelform_factory, inlineformset_factory
 from core.forms import AcceptForm, Row3Form, InlineForm
 from core.filters import filterset_factory
-from datetime import date
+from core.models import Event
 
 Notification = apps.get_model('core', model_name='notification')
 
 
 class Home(LoginRequiredMixin, View):
     def get(self, request):
+        events = Event().all()
         cards = {model._meta.verbose_name_plural: model.objects.all().count() for model in apps.get_models()}
         return render(request, f'{self.__class__.__name__.lower()}.html', locals())
 
@@ -42,8 +43,21 @@ class List(LoginRequiredMixin, View):
     def get(self, request, app, model):
         model = apps.get_model(app, model_name=model)
 
+        query = {}
         fields = {'filter': getattr(model, 'conf', {}).get('list', {}).get('filter', [])}
-        _filter = filterset_factory(model, **fields)(request.GET, queryset=model.objects.select_related().all())
+
+        if 'created_by' in [field.name for field in model._meta.get_fields()]:
+            query = {
+                'created_by__employee__branch': request.user.employee.branch,
+                'created_by__employee__direction': request.user.employee.direction,
+                'created_by__employee__subDirection': request.user.employee.subDirection,
+                'created_by__employee__service': request.user.employee.service
+            }
+            query = {k: v for k, v in query.items() if v is not None}
+            print(query)
+
+        qs = model.objects.select_related().filter(**query)
+        _filter = filterset_factory(model, **fields)(request.GET, queryset=qs)
         filter_form = _filter.form
         qs = _filter.qs
         return render(request, f'{self.__class__.__name__.lower()}.html', locals())

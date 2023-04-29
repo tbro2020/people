@@ -41,14 +41,12 @@
     </div>
 </div>
 
-{{ leaves|json_script:"leaves" }}
+{{ events|json_script:"events" }}
 {{ birthdays|json_script:"birthdays" }}
 
 <script>
 var today = new Date();
-var events = JSON.parse(document.getElementById('leaves').textContent);
-events = events.concat(JSON.parse(document.getElementById('birthdays').textContent));
-console.log(events);
+var events = JSON.parse(document.getElementById('events').textContent);
 
 $(document).ready(function() {
     $("#calendar").evoCalendar({

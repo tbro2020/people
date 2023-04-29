@@ -1,3 +1,5 @@
+from datetime import date
+
 from django.urls import reverse_lazy
 from django.apps import apps
 from django.db import models
@@ -171,3 +173,33 @@ class BaseModel(models.Model):
 
     class Meta:
         abstract = True
+
+
+class Event:
+    def __init__(self):
+        self.today = date.today()
+        self.leaves = apps.get_model('leave', model_name='leave')
+        self.birthdays = apps.get_model('employee', model_name='employee')
+
+    def get_leaves(self):
+        leaves = self.leaves.objects.select_related().filter(created__year=self.today.year)
+        return [{
+            'id': f'leave-{leave.id}',
+            'name': f'{leave.type_of.name}',
+            'type': 'event',
+            'date': [leave.start_period, leave.end_period],
+            'description': f'{leave.created_by.employee} {leave.reason}'
+        } for leave in leaves if leave.approved()]
+
+    def get_birthdays(self):
+        birthdays = self.birthdays.objects.select_related().filter(dob__month=self.today.month)
+        return [{
+            'id': f'birthday-{employee.id}',
+            'name': f'Birthday of {employee.full_name()}',
+            'type': 'birthday',
+            'date': employee.dob,
+            'description': f'{employee} of {employee.direction.name}'
+        } for employee in birthdays]
+
+    def all(self):
+        return self.get_leaves() + self.get_birthdays()
