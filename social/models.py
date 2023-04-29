@@ -22,7 +22,7 @@ class FundRequest(BaseModel):
 
     conf = {
         'icon': 'dollar-sign',
-        'description': 'value',
+        'description': 'Gestion des demandes de fonds',
         'entry': reverse_lazy('core:list', kwargs={'app': 'social', 'model': 'fundrequest'}),
         'list': {
             'display': [('description', 'Description'), ('currency', 'Device'), ('amount', 'Montant'), ('updated', 'Mis à jour le')],

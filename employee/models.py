@@ -178,7 +178,7 @@ class Employee(models.Model):
 
     conf = {
         'icon': 'users',
-        'description': 'value',
+        'description': 'The list of all employee of the company',
         'entry': reverse_lazy('core:list', kwargs={'app': 'employee', 'model': 'employee'}),
         'list': {
             'display': [('matricule', 'Matricule'), ('direction', 'Direction'), ('function', 'Fonction'), ('last_name', 'Nom'), ('first_name', 'Prenom'), ('status', 'Status'), ('updated', 'Mis à jour le')],

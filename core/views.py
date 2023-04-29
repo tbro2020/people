@@ -54,7 +54,6 @@ class List(LoginRequiredMixin, View):
                 'created_by__employee__service': request.user.employee.service
             }
             query = {k: v for k, v in query.items() if v is not None}
-            print(query)
 
         qs = model.objects.select_related().filter(**query)
         _filter = filterset_factory(model, **fields)(request.GET, queryset=qs)
@@ -123,7 +122,7 @@ class Change(LoginRequiredMixin, View):
         if 'change' not in getattr(model, 'conf', {}):
             return redirect(f"{reverse('core:read', kwargs={'app': app, 'model': model._meta.model_name})}?pk={obj.id}")
 
-        if hasattr(obj, 'approved') and obj.approved and request.user.employee not in obj.approvers():
+        if hasattr(obj, 'approved') and obj.approved() and request.user.employee not in obj.approvers():
             return redirect(f"{reverse('core:read', kwargs={'app': app, 'model': model._meta.model_name})}?pk={obj.id}")
 
         inlines = []

@@ -8,7 +8,7 @@ class Requisition(BaseModel):
 
     conf = {
         'icon': 'shopping-cart',
-        'description': 'value',
+        'description': 'Gestion des requêtes de produits',
         'entry': reverse_lazy('core:list', kwargs={'app': 'logistic', 'model': 'requisition'}),
         'list': {
             'display': [('created_by', 'Agent'), ('name', 'Nom'), ('updated', 'Mis à jour le')],

@@ -13,7 +13,7 @@ class Exit(BaseModel):
 
     conf = {
         'icon': 'log-out',
-        'description': 'value',
+        'description': 'Gestion des autorisations de sortie',
         'entry': reverse_lazy('core:list', kwargs={'app': 'exit', 'model': 'exit'}),
         'list': {
             'display': [('created_by', 'Agent'), ('exit_time', 'Heure de sortie'), ('reason', 'Motif de sortie'), ('destination', 'Destination'),

@@ -36,7 +36,7 @@ class Leave(BaseModel):
 
     conf = {
         'icon': 'calendar',
-        'description': 'value',
+        'description': 'Gestion des congés',
         'entry': reverse_lazy('core:list', kwargs={'app': 'leave', 'model': 'leave'}),
         'list': {
             'display': [('type_of', 'Type de congé'), ('created_by', 'Agent'), ('start_period', 'Période de départ'),

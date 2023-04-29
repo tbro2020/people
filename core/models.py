@@ -114,7 +114,7 @@ class Approver(models.Model):
 
     class Meta:
         verbose_name = 'Approbateur'
-        # unique_together = ('model', 'employee',)
+        unique_together = ('model', 'employee',)
 
 
 class Approval(models.Model):
