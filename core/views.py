@@ -1,6 +1,7 @@
 from django.shortcuts import render, reverse, redirect, get_object_or_404
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponseRedirect
+from django.core.paginator import Paginator
 
 from django.urls import reverse_lazy
 from django.contrib import messages
@@ -60,6 +61,10 @@ class List(LoginRequiredMixin, View):
         _filter = filterset_factory(model, **fields)(request.GET, queryset=qs)
         filter_form = _filter.form
         qs = _filter.qs
+
+        qs = Paginator(qs, 25)
+        qs = qs.page(request.GET.get('page', 1))
+
         return render(request, f'{self.__class__.__name__.lower()}.html', locals())
 
 
