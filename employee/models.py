@@ -119,10 +119,10 @@ class PaymentMethod(models.Model):
 
 class Employee(models.Model):
     STATUS = (
-        ('Actif', 'Actif'),
-        ('Indisponibilite', 'Indisponibilite'),
-        ('Licenciement', 'Licenciement'),
-        ('Inactif', 'Inactif')
+        ('actif', 'Actif'),
+        ('indisponibilite', 'Indisponibilite'),
+        ('licenciement', 'Licenciement'),
+        ('inactif', 'Inactif')
     )
 
     GENDERS = (("Male", "Homme"), ("Female", "Femme"))

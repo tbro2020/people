@@ -1,5 +1,9 @@
+import time
 from datetime import date
 
+import requests
+from celery import shared_task
+from django.conf import settings
 from django.urls import reverse_lazy
 from django.apps import apps
 from django.db import models
@@ -34,6 +38,11 @@ class User(AbstractUser):
 
     objects = UserManager()
 
+    def __str__(self):
+        if self.employee:
+            return f"{self.employee}"
+        return f"{self.email}"
+
 
 class Announcement(models.Model):
     title = models.CharField(verbose_name="Titre", max_length=50)
@@ -42,7 +51,7 @@ class Announcement(models.Model):
     broadcast = models.BooleanField(default=False, verbose_name="Diffusé", help_text="Diffuser cette annonce à tous "
                                                                                      "les agents actifs par le biais "
                                                                                      "de différents canaux.")
-
+    branches = models.ManyToManyField('employee.Branch', verbose_name="Branche", blank=True)
     updated = models.DateTimeField(verbose_name="Mise à jour le", auto_now=True)
     created = models.DateTimeField(verbose_name="Créée le", auto_now_add=True)
 
@@ -61,7 +70,7 @@ class Announcement(models.Model):
         },
         'create': {
             'form': {
-                'fields': ['title', 'doc', 'broadcast', 'description'],
+                'fields': ['title', 'doc', 'broadcast', 'description', 'branch'],
                 'inlines': []
             }
         }
@@ -69,6 +78,17 @@ class Announcement(models.Model):
 
     def __str__(self):
         return f"{self.title}"
+
+    @shared_task
+    def notify(self):
+        if not self.broadcast or not settings.TG_TOKEN: return
+        branches = self.branches.all().values_list('name', flat=True)
+
+        if not branches: return
+        employees = apps.get_model('core', model_name='employee').objects.filter(branch__in=branches, status='actif')
+
+        TG_API_URL = f'https://api.telegram.org/bot{settings.TG_TOKEN}/sendMessage'
+        [requests.post(TG_API_URL, json={'chat_id': employee.tg.last_chat_id, 'text': self.description}) for employee in employees]
 
     class Meta:
         verbose_name = "Annonce"

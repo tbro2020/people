@@ -145,3 +145,5 @@ DEFAULT_PASSWORD = 'PEOPLE@13'
 # https://pypi.org/project/crispy-bootstrap5/
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
+
+CELERY_BROKER_URL = 'redis://localhost:6379'
