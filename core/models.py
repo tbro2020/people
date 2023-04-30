@@ -154,7 +154,7 @@ class Approval(models.Model):
 
 
 class BaseModel(models.Model):
-    created_by = CurrentUserField(verbose_name="Créée par", null=True, default=None)
+    created_by = CurrentUserField(verbose_name="Créée par")
     updated = models.DateTimeField(verbose_name="Mise à jour le", auto_now=True)
     created = models.DateTimeField(verbose_name="Créée le", auto_now_add=True)
 
@@ -162,13 +162,12 @@ class BaseModel(models.Model):
         app_label, model_name = self._meta.app_label, self._meta.model_name
         user = self.created_by
 
-        data = {'employee__branch': user.employee.branch, 'employee__direction': user.employee.direction,
-                'employee__subDirection': user.employee.subDirection, 'employee__service': user.employee.service}
+        data = {'employee__branch': getattr(user.employee, 'branch', None), 'employee__direction': getattr(user.employee, 'direction', None),
+                'employee__subDirection': getattr(user.employee, 'subDirection', None), 'employee__service': getattr(user.employee, 'service', None)}
         data = {key: value for key, value in data.items() if value}
 
-        qs = Approver.objects.select_related().filter(model=f'{app_label}.{model_name}') \
-            .filter(reduce(operator.or_, (models.Q(**d) for d in (dict([i]) for i in data.items())))).values_list(
-            'employee', flat=True)
+        qs = Approver.objects.select_related().filter(model=f'{app_label}.{model_name}')
+        if data: qs = qs.filter(reduce(operator.or_, (models.Q(**d) for d in (dict([i]) for i in data.items())))).values_list('employee', flat=True)
         return apps.get_model('employee', model_name='employee').objects.filter(id__in=qs)
 
     @property
