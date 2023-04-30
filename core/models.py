@@ -198,7 +198,7 @@ class Event:
     def __init__(self):
         self.today = date.today()
         self.leaves = apps.get_model('leave', model_name='leave')
-        self.birthdays = apps.get_model('employee', model_name='employee')
+        self.employee = apps.get_model('employee', model_name='employee')
 
     def get_leaves(self):
         leaves = self.leaves.objects.select_related().filter(created__year=self.today.year)
@@ -211,14 +211,14 @@ class Event:
         } for leave in leaves if leave.approved()]
 
     def get_birthdays(self):
-        birthdays = self.birthdays.objects.select_related().filter(dob__month=self.today.month)
+        employees = self.employee.objects.select_related().filter(status='actif')
         return [{
             'id': f'birthday-{employee.id}',
             'name': f'Birthday of {employee.full_name()}',
             'type': 'birthday',
             'date': employee.dob,
             'description': f'{employee} of {employee.direction.name}'
-        } for employee in birthdays]
+        } for employee in employees]
 
     def all(self):
         return self.get_leaves() + self.get_birthdays()

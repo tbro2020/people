@@ -1,8 +1,9 @@
-from django.http import HttpResponseRedirect
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render, reverse, redirect, get_object_or_404
-from django.contrib import messages
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.http import HttpResponseRedirect
+
 from django.urls import reverse_lazy
+from django.contrib import messages
 from django.views import View
 from django.apps import apps
 
