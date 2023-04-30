@@ -29,13 +29,13 @@
 </head>
 <body>
     <main>
-        <div class="d-flex flex-column flex-shrink-0 p-3 text-white bg-dark" style="width: 200px;">
+        <div class="d-flex flex-column flex-shrink-0 p-3 text-white bg-dark overflow-auto" style="width: 200px;">
             <a href="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
               <i data-feather="users"></i>
               <span class="fs-4 ms-2">People</span>
             </a>
             <hr>
-            <ul class="nav nav-pills flex-column mb-auto">
+            <ul class="nav nav-pills flex-column mb-auto ">
 
                 <li class="nav-item">
                     <a href="{% url 'core:home' %}" class="nav-link text-light {% if request.resolver_match.url_name == 'home' %}active{% endif %} py-3">
