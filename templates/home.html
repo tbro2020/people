@@ -2,27 +2,33 @@
 
 {% load core %}
 
-{% block header %}
-<!-- Add the evo-calendar.css for styling -->
-<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/evo-calendar@1.1.2/evo-calendar/css/evo-calendar.min.css"/>
-<!-- Add the evo-calendar.js for.. obviously, functionality! -->
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/evo-calendar@1.1.2/evo-calendar/js/evo-calendar.min.js"></script>
-
-<style>
-    .event-empty{
-        border-radius: 5px !important;
-    }
-</style>
-{% endblock %}
-
 {% block content %}
 <div class="container-fluid">
 
-    <h1 class="m-0">Accueil</h1>
+    <h1 class="m-0 mb-3">Accueil</h1>
 
-    <div class="col mt-3">
-        <div class="col rounded" id="calendar"></div>
+    <div class="col">
+        <div id="carousel-items" class="carousel slide rounded">
+          <div class="carousel-inner">
+              {% for item in items %}
+              <div class="carousel-item {% if forloop.counter == 1 %}active{% endif %}">
+                  <img src="{{ item.doc.url }}" class="d-block w-100 rounded" alt="{{ item.title|slugify }}">
+                  <div class="carousel-caption d-none d-md-block">
+                    <h5>{{ item.title }}</h5>
+                    <p>{{ item.description }}</p>
+                  </div>
+              </div>
+              {% endfor %}
+          </div>
+          <button class="carousel-control-prev" type="button" data-bs-target="#carousel-items" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+          </button>
+          <button class="carousel-control-next" type="button" data-bs-target="#carousel-items" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
+          </button>
+        </div>
     </div>
 
     <div class="col mt-5">
@@ -40,22 +46,4 @@
         </div>
     </div>
 </div>
-
-{{ events|json_script:"events" }}
-{{ birthdays|json_script:"birthdays" }}
-
-<script>
-var today = new Date();
-var events = JSON.parse(document.getElementById('events').textContent);
-
-$(document).ready(function() {
-    $("#calendar").evoCalendar({
-        'language': 'en',
-        format: "yyyy-mm-dd",
-        titleFormat: "MM",
-        calendarEvents: events
-    });
-});
-</script>
-
 {% endblock %}

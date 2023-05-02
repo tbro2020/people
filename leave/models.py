@@ -47,6 +47,12 @@ class Leave(BaseModel):
                 'href': reverse_lazy('core:create', kwargs={'app': 'leave', 'model': 'leave'}),
                 'class': 'btn btn-primary',
                 'title': 'Ajouter'
+            }, {
+                'method': 'GET',
+                'href': reverse_lazy('core:planning'),
+                'class': 'btn btn-info',
+                'title': 'Planning',
+                'condition': 'True' # make sure the user is an approver
             }]
         },
         'change': {

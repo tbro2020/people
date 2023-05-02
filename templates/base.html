@@ -31,12 +31,11 @@
     <main>
         <div class="d-flex flex-column flex-shrink-0 p-3 text-white bg-dark overflow-auto" style="width: 240px;">
             <a href="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
-              <i data-feather="users"></i>
-              <span class="fs-4 ms-2">People</span>
+              <img src="{% static 'images/logo.png' %}" width="48" />
+              <span class="fs-4 ms-2 fw-bolder">LMC.HR</span>
             </a>
             <hr>
             <ul class="nav nav-pills flex-column mb-auto ">
-
                 <li class="nav-item">
                     <a href="{% url 'core:home' %}" class="nav-link text-light {% if request.resolver_match.url_name == 'home' %}active{% endif %} py-3">
                         <i data-feather="home"></i>
@@ -61,9 +60,10 @@
                     </li>
                     {% endfor %}
                 {% endwith %}
-
             </ul>
+
             <hr>
+
             <div class="dropdown">
               <a class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
                 <i data-feather="user" class="text-light"></i>

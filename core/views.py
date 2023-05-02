@@ -14,11 +14,13 @@ from core.filters import filterset_factory
 from core.models import Event
 
 Notification = apps.get_model('core', model_name='notification')
+Announcement = apps.get_model('core', model_name='announcement')
 
 
 class Home(LoginRequiredMixin, View):
     def get(self, request):
-        events = Event().all()
+        branch = request.user.employee.branch
+        items = Announcement.objects.filter(branches__name=branch)[:6]
         cards = {model._meta.verbose_name_plural: model.objects.all().count() for model in apps.get_models()}
         return render(request, f'{self.__class__.__name__.lower()}.html', locals())
 
@@ -107,7 +109,9 @@ class Create(LoginRequiredMixin, View):
                              message=f'The {model._meta.verbose_name} has been successfuly created')
 
         # Notification need to be thread action
-        approvers = form.instance.approvers() or []
+        approvers = getattr(form.instance, 'approvers', [])
+        if not isinstance(approvers, list): approvers = approvers()
+
         approvers = [Notification(**{
             'message': f'{model._meta.verbose_name} #{form.instance.id} approval required',
             'target_id': approver.id,
@@ -211,3 +215,9 @@ class Document(LoginRequiredMixin, View):
         model = apps.get_model(app, model_name=model)
         obj = get_object_or_404(model, **request.GET.dict())
         return render(request, f'{self.__class__.__name__.lower()}/{document}.html', locals())
+
+
+class Planning(LoginRequiredMixin, View):
+    def get(self, request):
+        events = Event().all()
+        return render(request, f'{self.__class__.__name__.lower()}.html', locals())

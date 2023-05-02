@@ -16,4 +16,5 @@ urlpatterns = [
 
     path('import/<str:app>/<str:model>', List.as_view(), name='import'),
     path('export/<str:app>/<str:model>', List.as_view(), name='export'),
+    path('planning', Planning.as_view(), name='planning'),
 ]

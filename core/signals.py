@@ -15,4 +15,4 @@ def post_save_user(sender, instance, created, **kwargs):
 @receiver(post_save, sender=apps.get_model('core', model_name='announcement'))
 def post_save_announcement(sender, instance, created, **kwargs):
     if not created: return
-    instance.notify.delay()
+    #instance.notify()

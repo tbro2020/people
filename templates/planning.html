@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% load core %}
+
+{% block header %}
+<!-- Add the evo-calendar.css for styling -->
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/evo-calendar@1.1.2/evo-calendar/css/evo-calendar.min.css"/>
+<!-- Add the evo-calendar.js for.. obviously, functionality! -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/evo-calendar@1.1.2/evo-calendar/js/evo-calendar.min.js"></script>
+
+<style>
+    .event-empty{
+        border-radius: 5px !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <h1 class="m-0">Planning</h1>
+    <div class="col mt-3"><div class="col rounded" id="calendar"></div></div>
+</div>
+
+{{ events|json_script:"events" }}
+{{ birthdays|json_script:"birthdays" }}
+
+<script>
+var today = new Date();
+var events = JSON.parse(document.getElementById('events').textContent);
+
+$(document).ready(function() {
+    $("#calendar").evoCalendar({
+        'language': 'en',
+        format: "yyyy-mm-dd",
+        titleFormat: "MM",
+        calendarEvents: events
+    });
+});
+</script>
+{% endblock %}

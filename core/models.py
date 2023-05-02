@@ -70,7 +70,7 @@ class Announcement(models.Model):
         },
         'create': {
             'form': {
-                'fields': ['title', 'doc', 'broadcast', 'description', 'branch'],
+                'fields': ['title', 'doc', 'broadcast', 'description', 'branches'],
                 'inlines': []
             }
         }
