@@ -128,8 +128,8 @@ class Employee(models.Model):
     GENDERS = (("Male", "Homme"), ("Female", "Femme"))
 
     direction = models.ForeignKey(Direction, verbose_name="Direction", null=True, on_delete=models.SET_NULL)
-    subDirection = models.ForeignKey(SubDirection, verbose_name="Sous-Direction/Technostructure", null=True, on_delete=models.SET_NULL)
-    service = models.ForeignKey(Service, verbose_name="Service", null=True, on_delete=models.SET_NULL)
+    subDirection = models.ForeignKey(SubDirection, verbose_name="Sous-Direction/Technostructure", blank=True, null=True, on_delete=models.SET_NULL)
+    service = models.ForeignKey(Service, verbose_name="Service", blank=True, null=True, on_delete=models.SET_NULL)
 
     function = models.ForeignKey(Function, verbose_name="Fonction", null=True, on_delete=models.SET_NULL)
     grade = models.ForeignKey(Grade, verbose_name="Grade", null=True, on_delete=models.SET_NULL)

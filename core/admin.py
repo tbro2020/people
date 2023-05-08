@@ -16,4 +16,4 @@ permission = apps.get_model('auth', 'Permission')
     'name': 'Can view all %s' % model._meta.verbose_name_plural,
     'content_type': ContentType.objects.get_for_model(model),
     'codename': 'view_all_%s' % model._meta.model_name
-}) for model in apps.get_models() if model._meta.app_label in ['leave', 'exit', 'logistic']]
+}) for model in apps.get_models() if model._meta.app_label in ['leave', 'exit', 'logistic', 'social']]
