@@ -58,6 +58,12 @@ class List(LoginRequiredMixin, View):
                 'created_by__employee__service': request.user.employee.service
             }
             query = {k: v for k, v in query.items() if v is not None}
+            if len(query) == 4: query['created_by'] = request.user
+
+        for key, value in query.items():
+            if request.user.has_perm(f'{app}.can_view_all_{model._meta.model_name}_in_my_{key.split("__")[-1]}') and key in query:
+                del query[key]
+                query.pop('created_by', None)
 
         qs = model.objects.select_related().filter(**query)
         _filter = filterset_factory(model, **fields)(request.GET, queryset=qs)

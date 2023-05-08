@@ -140,7 +140,7 @@ class Employee(models.Model):
                                  default=None)
 
     first_name = models.CharField("Prenom", max_length=100, blank=True, null=True, default=None)
-    middle_name = models.CharField("Deuxième prénom", max_length=100, blank=True, null=True, default=None)
+    middle_name = models.CharField("Post nom", max_length=100, blank=True, null=True, default=None)
     last_name = models.CharField("Nom", max_length=100, blank=True, null=True, default=None)
 
     n_cnss = models.CharField("N. CNSS", max_length=50, blank=True, null=True, default=None)
