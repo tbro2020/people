@@ -60,8 +60,9 @@ class List(LoginRequiredMixin, View):
             query = {k: v for k, v in query.items() if v is not None}
             if len(query) == 4: query['created_by'] = request.user
 
-        for key, value in query.items():
-            if request.user.has_perm(f'{app}.can_view_all_{model._meta.model_name}_in_my_{key.split("__")[-1]}') and key in query:
+        _query = query.copy()
+        for key, value in _query.items():
+            if request.user.has_perm(f'{app}.view_all_{model._meta.model_name}_in_my_{key.split("__")[-1]}') and key in query:
                 del query[key]
                 query.pop('created_by', None)
 
