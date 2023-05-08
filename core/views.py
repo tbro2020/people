@@ -19,7 +19,12 @@ Announcement = apps.get_model('core', model_name='announcement')
 
 class Home(LoginRequiredMixin, View):
     def get(self, request):
+        if not hasattr(request.user.employee, 'branch'):
+            cards = {model._meta.verbose_name_plural: model.objects.all().count() for model in apps.get_models()}
+            return render(request, f'{self.__class__.__name__.lower()}.html', locals())
+
         branch = request.user.employee.branch
+        notifications = Notification.objects.filter(target=request.user.employee, visited=False)[:6]
         items = Announcement.objects.filter(branches__name=branch)[:6]
         cards = {model._meta.verbose_name_plural: model.objects.all().count() for model in apps.get_models()}
         return render(request, f'{self.__class__.__name__.lower()}.html', locals())

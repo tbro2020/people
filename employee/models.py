@@ -161,7 +161,7 @@ class Employee(models.Model):
     address = models.TextField("Adresse permanente", blank=True, null=True, default=None)
     emergency_information = models.TextField("Information de contact d'urgence", null=True, default=None)
 
-    syndicate = models.CharField("Syndicat", max_length=10, choices=choices(Syndicat, 'name'), blank=True, null=True,
+    syndicate = models.CharField("Syndicat", max_length=50, choices=choices(Syndicat, 'name'), blank=True, null=True,
                                  default=None)
     branch = models.CharField("Branch", max_length=10, choices=choices(Branch, 'name'))
 
