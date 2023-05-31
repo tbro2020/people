@@ -3,6 +3,46 @@ from django.urls import reverse_lazy
 from core.models import BaseModel
 
 
+class Item(models.Model):
+    name = models.CharField(verbose_name='Nom', max_length=150)
+
+    conf = {
+        'icon': 'shopping-cart',
+        'description': 'Articles disponible',
+        'entry': reverse_lazy('core:list', kwargs={'app': 'logistic', 'model': 'item'}),
+        'list': {
+            'display': [('name', 'Nom')],
+            'action': [{
+                'method': 'GET',
+                'href': reverse_lazy('core:create', kwargs={'app': 'logistic', 'model': 'item'}),
+                'class': 'btn btn-primary',
+                'title': 'Ajouter'
+            }]
+        },
+        'change': {
+            'form': {
+                'fields': ['name'],
+                'inlines': []
+            },
+            'action': [{
+                'method': 'GET',
+                'href': reverse_lazy('core:delete', kwargs={'app': 'logistic', 'model': 'item'}),
+                'class': 'btn btn-danger',
+                'title': 'Delete',
+                'condition': 'True'
+            }]
+        },
+        'create': {
+            'form': {
+                'fields': ['name'],
+                'inlines': []
+            }
+        },
+    }
+
+    def __str__(self):
+        return self.name
+
 class Requisition(BaseModel):
     name = models.CharField(verbose_name='Nom', max_length=150)
 
@@ -82,9 +122,9 @@ class Requisition(BaseModel):
 class Product(models.Model):
     requisition = models.ForeignKey(Requisition, null=True, on_delete=models.SET_NULL, default=None)
 
-    name = models.CharField(verbose_name='Nom', max_length=150)
-    quantity = models.FloatField(verbose_name='Quantite', default=0.0)
+    item = models.ForeignKey(Item, on_delete=models.SET_NULL, null=True)
     unit = models.CharField(verbose_name='Unite', max_length=10)
+    quantity = models.FloatField(verbose_name='Quantite', default=0.0)
 
     updated = models.DateTimeField(verbose_name="Mise à jour le", auto_now=True)
     created = models.DateTimeField(verbose_name="Créée le", auto_now_add=True)

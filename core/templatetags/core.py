@@ -12,7 +12,9 @@ def menu(request):
     for model in apps.get_models():
         meta = model._meta
         if meta.app_label in ["admin"]: continue
-        if meta.model_name not in ["notification", "announcement", "employee", "leave", "exit", "requisition", "fundrequest"]: continue
+        if meta.model_name not in ["notification", "announcement",
+                                   "employee", "leave", "exit", "item",
+                                   "requisition", "fundrequest"]: continue
         if meta.app_label not in app: app[meta.app_label] = []
         if request.user.has_perm(f"{meta.app_label}.view_{meta.model_name}"):
             app[meta.app_label].append({

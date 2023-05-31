@@ -19,14 +19,13 @@ Announcement = apps.get_model('core', model_name='announcement')
 
 class Home(LoginRequiredMixin, View):
     def get(self, request):
+        cards = {model._meta.verbose_name_plural: model.objects.all().count() for model in apps.get_models()}
         if not hasattr(request.user.employee, 'branch'):
-            cards = {model._meta.verbose_name_plural: model.objects.all().count() for model in apps.get_models()}
             return render(request, f'{self.__class__.__name__.lower()}.html', locals())
 
         branch = request.user.employee.branch
         notifications = Notification.objects.filter(target=request.user.employee, visited=False)[:6]
         items = Announcement.objects.filter(branches__name=branch)[:6]
-        cards = {model._meta.verbose_name_plural: model.objects.all().count() for model in apps.get_models()}
         return render(request, f'{self.__class__.__name__.lower()}.html', locals())
 
 
@@ -68,7 +67,7 @@ class List(LoginRequiredMixin, View):
         _query = query.copy()
         for key, value in _query.items():
             if request.user.has_perm(f'{app}.view_all_{model._meta.model_name}_in_{key.split("__")[-1]}') and key in query:
-                del query[key]
+                query.pop(key, None)
                 query.pop('created_by', None)
 
         qs = model.objects.select_related().filter(**query)

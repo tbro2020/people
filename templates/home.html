@@ -33,12 +33,12 @@
 
     <div class="col mt-5">
         <div class="row">
-            {% for key, value in cards.items %}
+            {% for key in cards %}
                 <div class="col-3 mb-3">
                     <a class="card text-decoration-none" href="#">
                         <div class="card-body text-bg-{{ ''|background }} text-end">
-                            <h2 class="m-0">{{ value }}</h2>
-                            <small class="mt-1">{{ key|title }}</small>
+                            <h2 class="m-0">{{ cards|getitem:key }}</h2>
+                            <small class="mt-1">{{ key }}</small>
                         </div>
                     </a>
                 </div>

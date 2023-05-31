@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 from phonenumber_field.modelfields import PhoneNumberField
 from django.urls import reverse_lazy
 from django.db import models
@@ -128,7 +129,8 @@ class Employee(models.Model):
     GENDERS = (("Male", "Homme"), ("Female", "Femme"))
 
     direction = models.ForeignKey(Direction, verbose_name="Direction", null=True, on_delete=models.SET_NULL)
-    subDirection = models.ForeignKey(SubDirection, verbose_name="Sous-Direction/Technostructure", blank=True, null=True, on_delete=models.SET_NULL)
+    subDirection = models.ForeignKey(SubDirection, verbose_name="Sous-Direction/Technostructure", blank=True, null=True,
+                                     on_delete=models.SET_NULL)
     service = models.ForeignKey(Service, verbose_name="Service", blank=True, null=True, on_delete=models.SET_NULL)
 
     function = models.ForeignKey(Function, verbose_name="Fonction", null=True, on_delete=models.SET_NULL)
@@ -181,8 +183,11 @@ class Employee(models.Model):
         'description': 'The list of all employee of the company',
         'entry': reverse_lazy('core:list', kwargs={'app': 'employee', 'model': 'employee'}),
         'list': {
-            'display': [('matricule', 'Matricule'), ('direction', 'Direction'), ('function', 'Fonction'), ('last_name', 'Nom'), ('first_name', 'Prenom'), ('status', 'Status'), ('updated', 'Mis à jour le')],
-            'filter': ['direction', 'subDirection', 'function', 'grade', 'gender', 'marital_status', 'branch', 'payment_method', 'status', 'doj'],
+            'display': [('matricule', 'Matricule'), ('direction', 'Direction'), ('function', 'Fonction'),
+                        ('last_name', 'Nom'), ('first_name', 'Prenom'), ('status', 'Status'),
+                        ('updated', 'Mis à jour le')],
+            'filter': ['direction', 'subDirection', 'function', 'grade', 'gender', 'marital_status', 'branch',
+                       'payment_method', 'status', 'doj'],
             'action': [{
                 'method': 'GET',
                 'href': reverse_lazy('core:create', kwargs={'app': 'employee', 'model': 'employee'}),
@@ -208,6 +213,10 @@ class Employee(models.Model):
                     'fields': ['full_name', 'dob', 'birth_certificate']
                 }, {
                     'app': 'employee',
+                    'model': 'familymember',
+                    'fields': ['relationship', 'full_name', 'contact_info']
+                }, {
+                    'app': 'employee',
                     'model': 'document',
                     'fields': ['name', 'doc']
                 }]
@@ -220,7 +229,8 @@ class Employee(models.Model):
                 'condition': 'True'
             }, {
                 'method': 'GET',
-                'href': reverse_lazy('core:document', kwargs={'app': 'employee', 'model': 'employee', 'document': 'employee'}),
+                'href': reverse_lazy('core:document',
+                                     kwargs={'app': 'employee', 'model': 'employee', 'document': 'employee'}),
                 'class': 'btn btn-info',
                 'title': 'Document',
                 'condition': 'True'
@@ -283,12 +293,28 @@ class Child(models.Model):
     def __str__(self):
         return f"{self.full_name}"
 
+    def save(self, *args, **kwargs):
+        if (date.today().year - self.birth_certificate.year) >= 25:
+            raise ValidationError('The child should be less than 25 years old')
+        return super().save(*args, **kwargs)
+
     class Meta:
         verbose_name = "Enfant"
 
 
+class DocumentType(models.Model):
+    name = models.CharField(verbose_name="Nom", max_length=100)
+    updated = models.DateTimeField(verbose_name="Mise à jour le", auto_now=True)
+    created = models.DateTimeField(verbose_name="Créée le", auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.name}"
+
+
 class Document(models.Model):
     employee = models.ForeignKey(Employee, verbose_name="Employee", null=True, on_delete=models.SET_NULL)
+
+    _type = models.ForeignKey(DocumentType, verbose_name="Type", on_delete=models.SET_NULL, blank=True, null=True, default=None)
 
     name = models.CharField(verbose_name="Nom", max_length=100)
     doc = models.FileField(verbose_name="Document", upload_to=upload_directory_file)
@@ -301,3 +327,14 @@ class Document(models.Model):
 
     class Meta:
         verbose_name = "Document"
+
+
+class FamilyMember(models.Model):
+    employee = models.ForeignKey(Employee, verbose_name="Employee", null=True, on_delete=models.SET_NULL)
+
+    relationship = models.CharField(verbose_name="Relation", max_length=30)
+    full_name = models.CharField(verbose_name="Nom complet", max_length=150)
+    contact_info = models.TextField(verbose_name="Information de contact")
+
+    updated = models.DateTimeField(verbose_name="Mise à jour le", auto_now=True)
+    created = models.DateTimeField(verbose_name="Créée le", auto_now_add=True)
