@@ -19,7 +19,7 @@ Announcement = apps.get_model('core', model_name='announcement')
 
 class Home(LoginRequiredMixin, View):
     def get(self, request):
-        cards = {model._meta.verbose_name_plural: model.objects.all().count() for model in apps.get_models()}
+        cards = {model._meta.verbose_name_plural: model.objects.all().count() for model in apps.get_models() if model._meta.app_label in ['employee', 'leave', 'exit', 'logistic', 'social']}
         if not hasattr(request.user.employee, 'branch'):
             return render(request, f'{self.__class__.__name__.lower()}.html', locals())
 

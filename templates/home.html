@@ -34,9 +34,9 @@
     <div class="col mt-5">
         <div class="row">
             {% for key in cards %}
-                <div class="col-3 mb-3">
-                    <a class="card text-decoration-none" href="#">
-                        <div class="card-body text-bg-{{ ''|background }} text-end">
+                <div class="col-3 mb-3 rounded">
+                    <a class="card text-decoration-none rounded" href="#">
+                        <div class="card-body rounded text-bg-{{ ''|background }} text-end">
                             <h2 class="m-0">{{ cards|getitem:key }}</h2>
                             <small class="mt-1">{{ key }}</small>
                         </div>
