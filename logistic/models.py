@@ -43,6 +43,9 @@ class Item(models.Model):
     def __str__(self):
         return self.name
 
+    class Meta:
+        verbose_name = "Produit"
+
 class Requisition(BaseModel):
     name = models.CharField(verbose_name='Nom', max_length=150)
 
